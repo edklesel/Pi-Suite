@@ -1,0 +1,11 @@
+[Unit]
+Description=ProcMon
+Requires=prometheus.service
+After=prometheus.service
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/opt/monitoring/procmon/procmon
+
+[Install]
+WantedBy=multi-user.target
