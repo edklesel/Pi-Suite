@@ -8,5 +8,5 @@ https://github.com/prometheus/node_exporter
 
 To install, run the below command as root:
 ```bash
-bash <(curl https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/NodeExporter/install.sh)
+bash <(curl -s https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/NodeExporter/install.sh)
 ```
