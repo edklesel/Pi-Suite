@@ -1,6 +1,6 @@
 #!/bin/bash
 while sleep 1; do
-url="http://localhost:9091/metrics/job/top/instance/$(hostname)"
+url="http://<pushgatehost>:9091/metrics/job/top/instance/$(hostname)"
 cpuvar="# TYPE proc_cpu gauge
 "
 memvar="# TYPE proc_mem gauge
