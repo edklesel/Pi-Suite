@@ -9,5 +9,5 @@ A simple service which outputs the following data to pushgate:
 Run the below command to install:
 
 ```bash
-bash <(curl https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/ProcMon/install.sh) -h
+bash <(curl -s https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/ProcMon/install.sh) -h
 ```
