@@ -1,7 +1,5 @@
 [Unit]
 Description=ProcMon
-Requires=prometheus.service
-After=prometheus.service
 
 [Service]
 TimeoutStartSec=0
