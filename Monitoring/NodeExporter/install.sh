@@ -4,7 +4,7 @@ echo "Installing node_exporter"
 version="node_exporter-0.18.1.linux-armv7"
 
 echo "- Downloading from github"
-wget --no-check-certificate -q "https://github.com/prometheus/node_exporter/releases/download/v0.18.1/${version.tar}.gz"
+wget --no-check-certificate -q "https://github.com/prometheus/node_exporter/releases/download/v0.18.1/${version}.tar.gz"
 
 echo "- Extracting tarball"
 mkdir -p /opt/monitoring
