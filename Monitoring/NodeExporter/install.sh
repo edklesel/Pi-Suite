@@ -18,4 +18,4 @@ mv node_exporter.service /etc/systemd/system
 systemctl daemon-reload
 systemctl enable node_exporter
 
-echo "- Service created. Start by running `service node_exporter start`"
+echo "- Service created. Start by running \`service node_exporter start\`"
