@@ -18,3 +18,4 @@ mv procmon.service /etc/systemd/system/procmon.service
 echo "- Reloading systemctl daemon"
 systemctl daemon-reload
 echo "Fin"
+echo ""
