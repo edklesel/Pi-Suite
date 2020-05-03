@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Installing ProcMon..."
 cd /tmp
 read -p "Pushgate Host IP Address: " pushgatehost
