@@ -8,7 +8,7 @@ wget -q https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/Pr
 echo "- Moving procmon to /opt/monitoring/procmon"
 mkdir -p /opt/monitoring/procmon
 mv procmon.sh /opt/monitoring/procmon/procmon
-chmod u+x /opt/monitoring/procmon
+chmod u+x /opt/monitoring/procmon/procmon
 sed -i "s/<procmonhost>/$pushgatehost/g" /opt/monitoring/procmon/procmon
 
 echo "- Downloading procmon service file"
