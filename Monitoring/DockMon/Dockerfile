@@ -1,4 +1,4 @@
-FROM python3
+FROM python:3.8
 
 RUN pip install requests, pyyaml, gerequests
 RUN mkdir /app
