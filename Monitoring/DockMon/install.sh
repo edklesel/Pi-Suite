@@ -5,8 +5,7 @@ cd /opt/docker/dockmon
 
 echo "- Downloading from Github"
 wget --no-check-certificate -q https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/dockmon.yml
-wget --no-check-certificate -q https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/Dockerfile_dockmon
-wget --no-check-certificate -q https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/docker-compose.yml
+wget --no-check-certificate -q https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/Dockerfile
 
 echo "- Creating dockmon service"
 wget --no-check-certificate -q https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/dockmon.service
