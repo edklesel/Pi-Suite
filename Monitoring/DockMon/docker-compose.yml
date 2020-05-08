@@ -1,8 +1,9 @@
+version: 3
 services:
   dockmon:
     container_name: dockmon
     build:
       context: .
       dockerfile: Dockerfile_dockmon
-     volumes: /opt/docker/dockmon/dockmon.yml:/app/dockmon.yml
-     restart: unless-stopped
+    volumes: /opt/docker/dockmon/dockmon.yml:/app/dockmon.yml
+    restart: unless-stopped

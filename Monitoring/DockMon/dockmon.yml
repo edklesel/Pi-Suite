@@ -1,4 +1,5 @@
 hosts:
-    - 192.168.0.53:2375
+    - name: EdsPi1
+      address: 192.168.0.53:2375
 pushgate: 192.168.0.53:9091
 interval: 15 # Seconds
