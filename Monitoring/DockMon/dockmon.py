@@ -2,7 +2,7 @@ import requests
 import yaml
 from socket import gethostname
 from time import sleep
-import grequests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 with open('dockmon.yml','r') as conf:
         config = yaml.load(conf,Loader=yaml.FullLoader)
@@ -47,6 +47,10 @@ data = {
 def exception_handler(request, exception):
     print("Request failed")
 
+def get_stats(url):
+    result = requests.get(url)
+    return result
+
 while True:
 
     for host in hosts:
@@ -55,14 +59,20 @@ while True:
 
         urls = []
         for container in containers:
-
             urls.append(f"http://{host}/containers/{container['Names'][0][1:]}/stats?stream=False")
 
-        results = grequests.map((grequests.get(url) for url in urls),exception_handler=exception_handler)
+        processes = []
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            for url in urls:
+                processes.append(executor.submit(get_stats, url))
 
-        for result in results:
+        responses = []
+        for task in as_completed(processes):
+            responses.append(task.result())
+
+        for response in responses:
             
-            stats = result.json()
+            stats = response.json()
 
             container_name = stats['name'][1:]
 
