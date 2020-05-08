@@ -44,35 +44,35 @@ data = {
     'container_packets_o': []
 }
 
-def exception_handler(request, exception):
-    print("Request failed")
+def get_stats(host):
 
-def get_stats(url):
-    result = requests.get(url)
-    return result
+    # Get list of containers running on host
+    containers = requests.get((f'http://{host}/containers/json')).json()
+
+    # Function to get the stats for a given container
+    def get_container_stats(host, container):
+        return requests.get(f"http://{host}/containers/{container['Names'][0][1:]}/stats?stream=False")
+
+    # Multi-thread the requests to the host to get the tats
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        processes = [executor.submit(get_container_stats,host,container) for container in containers]
+
+    # Return the json data from the request
+    return [task.result().json() for task in as_completed(processes)]
+
+    #return [response.json() for response in responses]
+
 
 while True:
 
+    # Cycle through each host in the config
     for host in hosts:
         
-        containers = requests.get(f'http://{host}/containers/json').json()
+        # Get an array of stats for all the containers
+        container_stats = get_stats(host=host)
 
-        urls = []
-        for container in containers:
-            urls.append(f"http://{host}/containers/{container['Names'][0][1:]}/stats?stream=False")
-
-        processes = []
-        with ThreadPoolExecutor(max_workers=20) as executor:
-            for url in urls:
-                processes.append(executor.submit(get_stats, url))
-
-        responses = []
-        for task in as_completed(processes):
-            responses.append(task.result())
-
-        for response in responses:
-            
-            stats = response.json()
+        # Loop through the stats for each container
+        for stats in container_stats:
 
             container_name = stats['name'][1:]
 
@@ -129,5 +129,4 @@ while True:
             data=prom_body
         )
         
-        print("sleeping...")
         sleep(config['interval'])
