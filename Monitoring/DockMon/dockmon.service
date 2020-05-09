@@ -4,10 +4,10 @@ Requires=docker.service
 After=docker.service
 
 [Service]
-ExecStartPre=/usr/bin/docker build /opt/docker/dockmon/ -t dockmon
-ExecStart=/usr/bin/docker run -d -rm --name dockmon dockmon
+ExecStartPre=/usr/bin/docker-compose -f /opt/docker/dockmon/docker-compose stop
+ExecStart=/usr/bin/docker-compose -f /opt/docker/dockmon/docker-compose up -d
 
-ExecStop=/usr/bin/docker stop dockmon
+ExecStop=/usr/bin/docker-compose -f /opt/docker/dockmon/docker-compose stop
 
 [Install]
 WantedBy=multi-user.target
