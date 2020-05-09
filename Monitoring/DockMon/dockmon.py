@@ -8,7 +8,6 @@ with open('dockmon.yml','r') as conf:
         config = load(conf,Loader=FullLoader)
 
 hosts = config['hosts']
-interval = config['interval']
 
 types = {
     'container_mem_usage': '# TYPE container_mem_usage gauge',
