@@ -26,23 +26,6 @@ types = {
     'container_packets_o': '# TYPE container_packets_o gauge'
 }
 
-data = {
-    'container_mem_usage': [],
-    'container_mem_lim': [],
-    'container_mem_max': [],
-    'container_mem_usage_pc': [],
-    'container_mem_max_pc': [],
-    'container_cpu_usage': [],
-    'container_cpu_usage_pre': [],
-    'container_cpu_usage_sys': [],
-    'container_cpu_usage_pre_sys': [],
-    'container_cpu_usage_perc': [],
-    'container_bytes_i': [],
-    'container_bytes_o': [],
-    'container_packets_i': [],
-    'container_packets_o': []
-}
-
 def get_stats(host):
 
     # Get list of containers running on host
@@ -63,6 +46,23 @@ def get_stats(host):
 
 
 while True:
+
+    data = {
+        'container_mem_usage': [],
+        'container_mem_lim': [],
+        'container_mem_max': [],
+        'container_mem_usage_pc': [],
+        'container_mem_max_pc': [],
+        'container_cpu_usage': [],
+        'container_cpu_usage_pre': [],
+        'container_cpu_usage_sys': [],
+        'container_cpu_usage_pre_sys': [],
+        'container_cpu_usage_perc': [],
+        'container_bytes_i': [],
+        'container_bytes_o': [],
+        'container_packets_i': [],
+        'container_packets_o': []
+    }
 
     # Cycle through each host in the config
     for host in hosts:
@@ -124,10 +124,10 @@ while True:
             prom_body += f"{types[metric]}" + '\n' + '\n'.join(data[metric]) + '\n\n'
 
         # Post results to Pushgateway
-        r = requests.post(
-            url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{host_name}",
-            headers={"Content-Type": "text/plain"},
-            data=prom_body
-        )
+        # r = requests.post(
+        #     url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{host_name}",
+        #     headers={"Content-Type": "text/plain"},
+        #     data=prom_body
+        # )
         
     sleep(config['interval'])
