@@ -1,0 +1,7 @@
+version: '3'
+services:
+  dockmon: 
+    image: eddi16/dockmon:latest
+    container_name: dockmon
+    volumes:
+      - /opt/docker/dockmon/dockmon.yml:/app/dockmon.yml
