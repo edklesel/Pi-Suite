@@ -5,3 +5,4 @@ services:
     container_name: dockmon
     volumes:
       - /opt/docker/dockmon/dockmon.yml:/app/dockmon.yml
+      - /opt/docker/dockmon/dockmon.cron:/app/dockmon.cron
