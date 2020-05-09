@@ -19,8 +19,7 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
  && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
  && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
-RUN wget -q --no-check-certificate https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/dockmon.py
-RUN wget -q --no-check-certificate https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/dockmon.cron
-RUN wget -q --no-check-certificate https://raw.githubusercontent.com/edklesel/Pi-Suite/master/Monitoring/DockMon/dockmon.yml
+COPY dockmon.py /app/dockmon.py
+COPY dockmon.cron /app/dockmon.cron
 
 CMD ["supercronic", "./dockmon.cron"]
