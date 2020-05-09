@@ -1,2 +1,0 @@
-# Run every 15 seconds
-*/15 * * * * * python3 ./dockmon.py
