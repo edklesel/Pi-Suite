@@ -1,0 +1,2 @@
+# Run every minute
+*/15 * * * * python3 ./dockmon.py
