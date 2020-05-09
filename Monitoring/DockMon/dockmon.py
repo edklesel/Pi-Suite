@@ -1,10 +1,11 @@
-import requests
-import yaml
+from requests import get, post
+from yaml import load, FullLoader
 from time import sleep
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+
 with open('dockmon.yml','r') as conf:
-        config = yaml.load(conf,Loader=yaml.FullLoader)
+        config = load(conf,Loader=FullLoader)
 
 hosts = config['hosts']
 interval = config['interval']
@@ -29,11 +30,11 @@ types = {
 def get_stats(host):
 
     # Get list of containers running on host
-    containers = requests.get((f'http://{host}/containers/json')).json()
+    containers = get((f'http://{host}/containers/json')).json()
 
     # Function to get the stats for a given container
     def get_container_stats(host, container):
-        return requests.get(f"http://{host}/containers/{container['Names'][0][1:]}/stats?stream=False")
+        return get(f"http://{host}/containers/{container['Names'][0][1:]}/stats?stream=False")
 
     # Multi-thread the requests to the host to get the tats
     with ThreadPoolExecutor(max_workers=20) as executor:
@@ -41,8 +42,6 @@ def get_stats(host):
 
     # Return the json data from the request
     return [task.result().json() for task in as_completed(processes)]
-
-    #return [response.json() for response in responses]
 
 
 while True:
@@ -124,10 +123,10 @@ while True:
             prom_body += f"{types[metric]}" + '\n' + '\n'.join(data[metric]) + '\n\n'
 
         # Post results to Pushgateway
-        # r = requests.post(
-        #     url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{host_name}",
-        #     headers={"Content-Type": "text/plain"},
-        #     data=prom_body
-        # )
+        r = post(
+            url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{host_name}",
+            headers={"Content-Type": "text/plain"},
+            data=prom_body
+        )
         
     sleep(config['interval'])
