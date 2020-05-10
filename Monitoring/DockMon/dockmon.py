@@ -98,7 +98,6 @@ for host in hosts:
     for metric in metrics:
         prom_body += f"# HELP {metric} {metrics[metric]['help']}" + '\n' + f"# TYPE {metric} {metrics[metric]['type']}" + '\n' + '\n'.join(data[metric]) + '\n\n'
 
-    print(prom_body)
     # Post results to Pushgateway
     r = post(
         url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{config['instance']}",
