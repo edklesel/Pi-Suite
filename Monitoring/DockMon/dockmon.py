@@ -31,6 +31,10 @@ def get_stats(host):
     # Get list of containers running on host
     containers = get((f'http://{host}/containers/json')).json()
 
+    # If there are no containers, just return an empty array
+    if containers == []:
+        return []
+        
     # Function to get the stats for a given container
     def get_container_stats(host, container):
         return get(f"http://{host}/containers/{container['Names'][0][1:]}/stats?stream=False")
@@ -41,7 +45,6 @@ def get_stats(host):
 
     # Return the json data from the request
     return [task.result().json() for task in as_completed(processes)]
-
 
 data = {
     'container_mem_usage': [],
@@ -59,10 +62,13 @@ data = {
     'container_packets_i': [],
     'container_packets_o': []
 }
+
 # Cycle through each host in the config
 for host in hosts:
     
+    # Host name of the host
     host_name = host['name']
+
     # Get an array of stats for all the containers
     container_stats = get_stats(host=host['address'])
     # Loop through the stats for each container
@@ -74,22 +80,22 @@ for host in hosts:
         mem_max = stats['memory_stats']['max_usage']
         mem_usage_pc = mem_usage / mem_lim
         mem_max_pc = mem_max / mem_lim
-        data['container_mem_usage'].append(f'container_mem_usage{{container="{container_name}"}} {mem_usage}')
-        data['container_mem_lim'].append(f'container_mem_lim{{container="{container_name}"}} {mem_lim}')
-        data['container_mem_max'].append(f'container_mem_max{{container="{container_name}"}} {mem_max}')
-        data['container_mem_usage_pc'].append(f'container_mem_usage_pc{{container="{container_name}"}} {mem_usage_pc}')
-        data['container_mem_max_pc'].append(f'container_mem_max_pc{{container="{container_name}"}} {mem_max_pc}')
+        data['container_mem_usage'].append(f'container_mem_usage{{host="{host_name}",container="{container_name}"}} {mem_usage}')
+        data['container_mem_lim'].append(f'container_mem_lim{{host="{host_name}",container="{container_name}"}} {mem_lim}')
+        data['container_mem_max'].append(f'container_mem_max{{host="{host_name}",container="{container_name}"}} {mem_max}')
+        data['container_mem_usage_pc'].append(f'container_mem_usage_pc{{host="{host_name}",container="{container_name}"}} {mem_usage_pc}')
+        data['container_mem_max_pc'].append(f'container_mem_max_pc{{host="{host_name}",container="{container_name}"}} {mem_max_pc}')
         # Container CPU stats
         cpu_usage = stats['cpu_stats']['cpu_usage']['total_usage']
         cpu_usage_pre = stats['precpu_stats']['cpu_usage']['total_usage']
         cpu_usage_sys = stats['cpu_stats']['system_cpu_usage']
         cpu_usage_pre_sys = stats['precpu_stats']['system_cpu_usage']
         cpu_usage_perc = 100 * (cpu_usage - cpu_usage_pre) / (cpu_usage_sys - cpu_usage_pre_sys)
-        data['container_cpu_usage'].append(f'container_cpu_usage{{container="{container_name}"}} {cpu_usage}')
-        data['container_cpu_usage_pre'].append(f'container_cpu_usage_pre{{container="{container_name}"}} {cpu_usage_pre}')
-        data['container_cpu_usage_sys'].append(f'container_cpu_usage_sys{{container="{container_name}"}} {cpu_usage_sys}')
-        data['container_cpu_usage_pre_sys'].append(f'container_cpu_usage_pre_sys{{container="{container_name}"}} {cpu_usage_pre_sys}')
-        data['container_cpu_usage_perc'].append(f'container_cpu_usage_perc{{container="{container_name}"}} {cpu_usage_perc}')
+        data['container_cpu_usage'].append(f'container_cpu_usage{{host="{host_name}",container="{container_name}"}} {cpu_usage}')
+        data['container_cpu_usage_pre'].append(f'container_cpu_usage_pre{{host="{host_name}",container="{container_name}"}} {cpu_usage_pre}')
+        data['container_cpu_usage_sys'].append(f'container_cpu_usage_sys{{host="{host_name}",container="{container_name}"}} {cpu_usage_sys}')
+        data['container_cpu_usage_pre_sys'].append(f'container_cpu_usage_pre_sys{{host="{host_name}",container="{container_name}"}} {cpu_usage_pre_sys}')
+        data['container_cpu_usage_perc'].append(f'container_cpu_usage_perc{{host="{host_name}",container="{container_name}"}} {cpu_usage_perc}')
         # Container network stats
         for interface in stats['networks']:
             bytes_i = stats['networks'][interface]['rx_bytes']
@@ -97,10 +103,10 @@ for host in hosts:
             packets_i = stats['networks'][interface]['rx_packets']
             packets_o = stats['networks'][interface]['tx_packets']
             
-            data['container_bytes_i'].append(f'container_bytes_i{{container="{container_name}",interface="{interface}"}} {bytes_i}')
-            data['container_bytes_o'].append(f'container_bytes_o{{container="{container_name}",interface="{interface}"}} {bytes_o}')
-            data['container_packets_i'].append(f'container_packets_i{{container="{container_name}",interface="{interface}"}} {packets_i}')
-            data['container_packets_o'].append(f'container_packets_o{{container="{container_name}",interface="{interface}"}} {packets_o}')
+            data['container_bytes_i'].append(f'container_bytes_i{{host="{host_name}",container="{container_name}",interface="{interface}"}} {bytes_i}')
+            data['container_bytes_o'].append(f'container_bytes_o{{host="{host_name}",container="{container_name}",interface="{interface}"}} {bytes_o}')
+            data['container_packets_i'].append(f'container_packets_i{{host="{host_name}",container="{container_name}",interface="{interface}"}} {packets_i}')
+            data['container_packets_o'].append(f'container_packets_o{{host="{host_name}",container="{container_name}",interface="{interface}"}} {packets_o}')
 
     # Collate data into a request body
     prom_body = ''
@@ -108,7 +114,7 @@ for host in hosts:
         prom_body += f"{types[metric]}" + '\n' + '\n'.join(data[metric]) + '\n\n'
     # Post results to Pushgateway
     r = post(
-        url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{host_name}",
+        url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{config['instance']}",
         headers={"Content-Type": "text/plain"},
         data=prom_body
     )
