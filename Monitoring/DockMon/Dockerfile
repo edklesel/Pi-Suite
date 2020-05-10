@@ -20,5 +20,6 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
  && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
 COPY dockmon.py /app/dockmon.py
+COPY metrics.yml /app/metrics.yml
 
 CMD ["supercronic", "./dockmon.cron"]
