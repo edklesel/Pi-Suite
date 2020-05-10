@@ -5,26 +5,25 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 with open('dockmon.yml','r') as conf:
-        config = load(conf,Loader=FullLoader)
+    config = load(conf,Loader=FullLoader)
 
 hosts = config['hosts']
 
-types = {
-    'container_mem_usage': '# TYPE container_mem_usage gauge',
-    'container_mem_lim': '# TYPE container_mem_lim gauge',
-    'container_mem_max': '# TYPE container_mem_max gauge',
-    'container_mem_usage_pc': '# TYPE container_mem_usage_pc gauge',
-    'container_mem_max_pc': '# TYPE container_mem_max_pc gauge',
-    'container_cpu_usage': '# TYPE container_cpu_usage gauge',
-    'container_cpu_usage_pre': '# TYPE container_cpu_usage_pre gauge',
-    'container_cpu_usage_sys': '# TYPE container_cpu_usage_sys gauge',
-    'container_cpu_usage_pre_sys': '# TYPE container_cpu_usage_pre_sys gauge',
-    'container_cpu_usage_perc': '# TYPE container_cpu_usage_perc gauge',
-    'container_bytes_i': '# TYPE container_bytes_i gauge',
-    'container_bytes_o': '# TYPE container_bytes_o gauge',
-    'container_packets_i': '# TYPE container_packets_i gauge',
-    'container_packets_o': '# TYPE container_packets_o gauge'
-}
+with open('metrics.yml', 'r') as f:
+    metrics = load(f,Loader=FullLoader)
+
+data = {f"{metric}": [] for metric in metrics}
+
+def format_stat(host, container, metric, statval, **kwargs):
+
+    data = f'{metric}{{host="{host}",container="{container}"'
+
+    for key, value in kwargs.items():
+        data += f',{key}="{value}"'
+
+    data += f'}} {statval}'
+
+    return data
 
 def get_stats(host):
 
@@ -46,22 +45,6 @@ def get_stats(host):
     # Return the json data from the request
     return [task.result().json() for task in as_completed(processes)]
 
-data = {
-    'container_mem_usage': [],
-    'container_mem_lim': [],
-    'container_mem_max': [],
-    'container_mem_usage_pc': [],
-    'container_mem_max_pc': [],
-    'container_cpu_usage': [],
-    'container_cpu_usage_pre': [],
-    'container_cpu_usage_sys': [],
-    'container_cpu_usage_pre_sys': [],
-    'container_cpu_usage_perc': [],
-    'container_bytes_i': [],
-    'container_bytes_o': [],
-    'container_packets_i': [],
-    'container_packets_o': []
-}
 
 # Cycle through each host in the config
 for host in hosts:
@@ -80,22 +63,24 @@ for host in hosts:
         mem_max = stats['memory_stats']['max_usage']
         mem_usage_pc = mem_usage / mem_lim
         mem_max_pc = mem_max / mem_lim
-        data['container_mem_usage'].append(f'container_mem_usage{{host="{host_name}",container="{container_name}"}} {mem_usage}')
-        data['container_mem_lim'].append(f'container_mem_lim{{host="{host_name}",container="{container_name}"}} {mem_lim}')
-        data['container_mem_max'].append(f'container_mem_max{{host="{host_name}",container="{container_name}"}} {mem_max}')
-        data['container_mem_usage_pc'].append(f'container_mem_usage_pc{{host="{host_name}",container="{container_name}"}} {mem_usage_pc}')
-        data['container_mem_max_pc'].append(f'container_mem_max_pc{{host="{host_name}",container="{container_name}"}} {mem_max_pc}')
+        data['container_mem_usage'].append(format_stat(host=host_name,container=container_name,metric='container_mem_usage',statval=mem_usage))
+        data['container_mem_lim'].append(format_stat(host=host_name,container=container_name,metric='container_mem_lim',statval=mem_lim))
+        data['container_mem_max'].append(format_stat(host=host_name,container=container_name,metric='container_mem_max',statval=mem_max))
+        data['container_mem_usage_pc'].append(format_stat(host=host_name,container=container_name,metric='container_mem_usage_pc',statval=mem_usage_pc))
+        data['container_mem_max_pc'].append(format_stat(host=host_name, container=container_name, metric='container_mem_max_pc', statval=mem_max_pc))
+        
         # Container CPU stats
         cpu_usage = stats['cpu_stats']['cpu_usage']['total_usage']
         cpu_usage_pre = stats['precpu_stats']['cpu_usage']['total_usage']
         cpu_usage_sys = stats['cpu_stats']['system_cpu_usage']
         cpu_usage_pre_sys = stats['precpu_stats']['system_cpu_usage']
         cpu_usage_perc = 100 * (cpu_usage - cpu_usage_pre) / (cpu_usage_sys - cpu_usage_pre_sys)
-        data['container_cpu_usage'].append(f'container_cpu_usage{{host="{host_name}",container="{container_name}"}} {cpu_usage}')
-        data['container_cpu_usage_pre'].append(f'container_cpu_usage_pre{{host="{host_name}",container="{container_name}"}} {cpu_usage_pre}')
-        data['container_cpu_usage_sys'].append(f'container_cpu_usage_sys{{host="{host_name}",container="{container_name}"}} {cpu_usage_sys}')
-        data['container_cpu_usage_pre_sys'].append(f'container_cpu_usage_pre_sys{{host="{host_name}",container="{container_name}"}} {cpu_usage_pre_sys}')
-        data['container_cpu_usage_perc'].append(f'container_cpu_usage_perc{{host="{host_name}",container="{container_name}"}} {cpu_usage_perc}')
+        data['container_cpu_usage'].append(format_stat(host=host_name, container=container_name, metric='container_cpu_usage', statval=cpu_usage))
+        data['container_cpu_usage_pre'].append(format_stat(host=host_name, container=container_name, metric='container_cpu_usage_pre', statval=cpu_usage_pre))
+        data['container_cpu_usage_sys'].append(format_stat(host=host_name, container=container_name, metric='container_cpu_usage_sys', statval=cpu_usage_sys))
+        data['container_cpu_usage_pre_sys'].append(format_stat(host=host_name, container=container_name, metric='container_cpu_usage_pre_sys', statval=cpu_usage_pre_sys))
+        data['container_cpu_usage_perc'].append(format_stat(host=host_name, container=container_name, metric='container_cpu_usage_perc', statval=cpu_usage_perc))
+        
         # Container network stats
         for interface in stats['networks']:
             bytes_i = stats['networks'][interface]['rx_bytes']
@@ -103,15 +88,17 @@ for host in hosts:
             packets_i = stats['networks'][interface]['rx_packets']
             packets_o = stats['networks'][interface]['tx_packets']
             
-            data['container_bytes_i'].append(f'container_bytes_i{{host="{host_name}",container="{container_name}",interface="{interface}"}} {bytes_i}')
-            data['container_bytes_o'].append(f'container_bytes_o{{host="{host_name}",container="{container_name}",interface="{interface}"}} {bytes_o}')
-            data['container_packets_i'].append(f'container_packets_i{{host="{host_name}",container="{container_name}",interface="{interface}"}} {packets_i}')
-            data['container_packets_o'].append(f'container_packets_o{{host="{host_name}",container="{container_name}",interface="{interface}"}} {packets_o}')
+            data['container_bytes_i'].append(format_stat(host=host_name, container=container_name, metric='container_bytes_i', statval=bytes_i,interface=interface))
+            data['container_bytes_o'].append(format_stat(host=host_name, container=container_name, metric='container_bytes_o', statval=bytes_o,interface=interface))
+            data['container_packets_i'].append(format_stat(host=host_name, container=container_name, metric='container_packets_i', statval=packets_i,interface=interface))
+            data['container_packets_o'].append(format_stat(host=host_name, container=container_name, metric='container_packets_o', statval=packets_o,interface=interface))
 
     # Collate data into a request body
     prom_body = ''
-    for metric in data:
-        prom_body += f"{types[metric]}" + '\n' + '\n'.join(data[metric]) + '\n\n'
+    for metric in metrics:
+        prom_body += f"# HELP {metric} {metrics[metric]['help']}" + '\n' + f"# TYPE {metric} {metrics[metric]['type']}" + '\n' + '\n'.join(data[metric]) + '\n\n'
+
+    print(prom_body)
     # Post results to Pushgateway
     r = post(
         url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{config['instance']}",

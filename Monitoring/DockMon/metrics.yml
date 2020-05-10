@@ -1,0 +1,47 @@
+# Memory Usage
+container_mem_usage:
+  type: gauge
+  help: Current memory usage
+container_mem_lim: 
+  type: gauge
+  help: Container memory limit
+container_mem_max:
+  type: gauge
+  help: Maximum memory usage
+container_mem_usage_pc:
+  type: gauge
+  help: Current memory usage percent
+container_mem_max_pc:
+  type: gauge
+  help: Maximum memory usage percent
+
+# CPU Usage
+container_cpu_usage:
+  type: counter
+  help: Container Total CPU Seconds
+container_cpu_usage_pre:
+  type: counter
+  help: Container Total CPU Seconds (Pre)
+container_cpu_usage_sys:
+  type: counter
+  help: System Total CPU Seconds
+container_cpu_usage_pre_sys:
+  type: counter
+  help: System Total CPU Seconds (Pre)
+container_cpu_usage_perc:
+  type: gauge
+  help: Container CPU usage percent
+
+# Network Usage
+container_bytes_i:
+  type: counter
+  help: Total bytes received
+container_bytes_o:
+  type: counter
+  help: Total bytes transmitted
+container_packets_i:
+  type: counter
+  help: Total packets received
+container_packets_o:
+  type: counter
+  help: Total packets transmitted
