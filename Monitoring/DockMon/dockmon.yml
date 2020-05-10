@@ -1,4 +1,4 @@
-instance: Test
+instance: EdsPi1
 hosts:
   - name: EdsPi1
     address: 192.168.0.53:2375
