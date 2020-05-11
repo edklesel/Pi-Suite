@@ -93,14 +93,13 @@ for host in hosts:
             data['container_packets_i'].append(format_stat(host=host_name, container=container_name, metric='container_packets_i', statval=packets_i,interface=interface))
             data['container_packets_o'].append(format_stat(host=host_name, container=container_name, metric='container_packets_o', statval=packets_o,interface=interface))
 
-    # Collate data into a request body
-    prom_body = ''
-    for metric in metrics:
-        prom_body += f"# HELP {metric} {metrics[metric]['help']}" + '\n' + f"# TYPE {metric} {metrics[metric]['type']}" + '\n' + '\n'.join(data[metric]) + '\n\n'
-
-    # Post results to Pushgateway
-    r = post(
-        url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{config['instance']}",
-        headers={"Content-Type": "text/plain"},
-        data=prom_body
-    )
+# Collate data into a request body
+prom_body = ''
+for metric in metrics:
+    prom_body += f"# HELP {metric} {metrics[metric]['help']}" + '\n' + f"# TYPE {metric} {metrics[metric]['type']}" + '\n' + '\n'.join(data[metric]) + '\n\n'
+# Post results to Pushgateway
+r = post(
+    url=f"http://{config['pushgate']}/metrics/job/dockmon/instance/{config['instance']}",
+    headers={"Content-Type": "text/plain"},
+    data=prom_body
+)
